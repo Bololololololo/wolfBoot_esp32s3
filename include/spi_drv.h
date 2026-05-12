@@ -52,6 +52,10 @@
 #include "hal/spi/spi_drv_zynq.h"
 #endif
 
+#if defined(TARGET_esp32s3)
+#include "hal/spi/spi_drv_esp32s3.h"
+#endif
+
 #if defined(TARGET_nrf52)
 #include "hal/spi/spi_drv_nrf52.h"
 #endif

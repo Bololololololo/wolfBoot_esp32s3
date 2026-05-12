@@ -384,6 +384,7 @@ endif()
 
 if(NOT DEFINED ARM_TARGETS)
     list(APPEND ARM_TARGETS cypsoc6
+                            esp32s3
                             imx
                             imx_rt
                             kinetis
@@ -691,6 +692,11 @@ if(ARCH STREQUAL "ARM")
         else()
             set(WOLFBOOT_ORIGIN ${ARCH_FLASH_OFFSET})
         endif()
+    endif()
+
+    if(${WOLFBOOT_TARGET} STREQUAL "esp32s3")
+        set(ARCH_FLASH_OFFSET 0x00000000)
+        set(WOLFBOOT_ORIGIN ${ARCH_FLASH_OFFSET})
     endif()
 
     # TrustZone support for Cortex-M33 targets

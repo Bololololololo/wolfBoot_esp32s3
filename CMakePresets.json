@@ -137,6 +137,41 @@
         }
     },
     {
+      "name": "esp32s3",
+      "displayName": "esp32s3",
+      "inherits": [
+        "base",
+        "sign_hash_config"
+      ],
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build-esp32s3",
+      "cacheVariables": {
+        "ARCH": "XTENSA",
+        "WOLFBOOT_TARGET": "esp32s3",
+        "DEBUG": "OFF",
+        "SIGN": "ED25519",
+	"HASH": "SHA256",
+ 	"DEBUG": "0FF",
+	"DEBUG_UART": "OFF",
+	"VTOR": "OFF",
+	"NO_ASM": "OFF",
+        "EXT_FLASH": "OFF",
+        "SPI_FLASH": "ON",
+        "OCTOSPI_FLASH" : "ON",
+        "ALLOW_DOWNGRADE": "ON",
+        "NVM_FLASH_WRITEONCE": "OFF",
+        "WOLFBOOT_VERSION": "1",
+        "SPMATH": "ON",
+        "RAM_CODE": "OFF",
+        "DUALBANK_SWAP": "OFF",
+        "WOLFBOOT_PARTITION_SIZE": "0x1B0000",
+        "WOLFBOOT_SECTOR_SIZE": "0x1000",
+        "WOLFBOOT_PARTITION_BOOT_ADDRESS": "0x20000",
+        "WOLFBOOT_PARTITION_UPDATE_ADDRESS": "0x1d0000",
+        "WOLFBOOT_PARTITION_SWAP_ADDRESS": "0x380000",
+      }
+    },
+    {
       "name": "stm32c0",
       "displayName": "stm32c0",
       "inherits": [
@@ -543,6 +578,15 @@
     {
       "name": "imx_rt",
       "configurePreset": "imx_rt",
+      "jobs": 4,
+      "verbose": true,
+      "targets": [
+        "all"
+      ]
+    },
+    {
+      "name": "esp32s3",
+      "configurePreset": "esp32s3",
       "jobs": 4,
       "verbose": true,
       "targets": [
