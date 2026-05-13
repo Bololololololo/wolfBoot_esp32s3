@@ -91,6 +91,9 @@ are combined with SPI_MEM_CS_SETUP bit..*/
 #define SPI_MEM_CTRL2_REG(i) (REG_SPI_MEM_BASE(i) + 0x10)
 #define SPI_MEM_USER_REG(i) (REG_SPI_MEM_BASE(i) + 0x18)
 
+#define ESP_ROM_EFUSE_FLASH_DEFAULT_SPI (0)
+#define ESP_ROM_EFUSE_FLASH_DEFAULT_HSPI (1)
+
 // Functions
 // set bit or set bits to register
 #define REG_SET_BIT(_r, _b)                                               \

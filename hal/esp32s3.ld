@@ -31,8 +31,10 @@ bootloader_iram_loader_seg_start = bootloader_dram_seg_start - bootloader_iram_l
  */ 
 
 PROVIDE ( esp_rom_efuse_get_flash_gpio_info = 0x40001f74 );
-PROVIDE ( esp_rom_efuse_get_flash_wp_gpio = 0x40001fa4);
-PROVIDE ( esp_rom_gpio_pad_set_drv = 0x40001b18);
+PROVIDE ( esp_rom_efuse_get_flash_wp_gpio = 0x40001fa4 );
+PROVIDE ( esp_rom_gpio_pad_set_drv = 0x40001b18 );
+PROVIDE ( esp_rom_efuse_get_flash_gpio_info = 0x40001f74 );
+
 MEMORY
 {
     /* ESP32-S3 RAM mapping:
@@ -40,10 +42,10 @@ MEMORY
      * 0x3fcb_0000 - 0x3fce_0000: Internal SRAM (for bootloader use)
      */
     /* IRAM: Instruction RAM (for critical code) */
-    IRAM (rwx)      : ORIGIN = bootloader_iram_loader_seg_start, LENGTH = bootloader_iram_loader_seg_len
+    IRAM (rx)      : ORIGIN = bootloader_iram_loader_seg_start, LENGTH = bootloader_iram_loader_seg_len
 
     /* DRAM: Data RAM */
-    DRAM (rw)       : ORIGIN = bootloader_dram_seg_start, LENGTH = bootloader_dram_seg_len
+    DRAM (rwx)       : ORIGIN = bootloader_dram_seg_start, LENGTH = bootloader_dram_seg_len
 }
 
 SECTIONS

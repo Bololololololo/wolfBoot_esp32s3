@@ -197,7 +197,7 @@ uint16_t spi_flash_probe(void)
     if (manuf == 0xBF || manuf == 0xC2)
         chip_write_mode = SST_SINGLEBYTE;
     if (manuf == 0xEF)
-        chip_write_mode = WB_WRITEPAGE;
+        chip_write_mode = WB_WRITEPAGE;qqq
 
 #ifndef READONLY
     wait_busy();
