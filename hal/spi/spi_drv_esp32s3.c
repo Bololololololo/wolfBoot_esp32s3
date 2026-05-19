@@ -3,14 +3,12 @@
 #include <loader.h> /* for wolfBoot_panic */
 
 #include "spi_drv.h"
+#include "../hal/cache/cache_drv_esp32s3.h"
 #include "wolfboot/wolfboot.h"
 
 #define ESP_BOOTLOADER_SPIFLASH_BP_MASK_ISSI 0xBC  // BP bits mask for ISSI chips, which has different BP bit layout compared with default flash model. When unlocking, clear these bits to unprotect the whole flash.
 #define ESP_BOOTLOADER_SPIFLASH_QE_GD_SR2 0x2      // QE position when you write 8 bits(for SR2) at one time.
 #define ESP_BOOTLOADER_SPIFLASH_QE_SR1_2BYTE 0x200 // QE position when you write 16 bits at one time.
-
-// this has to be moved for initialization of the cache context before cache_hal_enable is called, which is required by spi_flash_wrap_enable_77.
-static cache_hal_context_t ctx;
 
 void IRAM_ATTR
 bootloader_configure_spi_pins(int drv)
@@ -460,109 +458,6 @@ void bootloader_enable_qio_mode(void)
 
     spi_flash_wrap_probe();
     spi_flash_wrap_disable();
-}
-
-/**
- * @brief Enable ICache
- *
- * @param inst_autoload_en ICache auto preload enabled
- */
-__attribute__((always_inline)) static inline void cache_ll_l1_enable_icache(bool inst_autoload_en)
-{
-    Cache_Enable_ICache(inst_autoload_en ? CACHE_LL_L1_ICACHE_AUTOLOAD : 0);
-}
-
-/**
- * @brief Disable ICache
- */
-__attribute__((always_inline)) static inline void cache_ll_l1_disable_icache(void)
-{
-    Cache_Disable_ICache();
-}
-
-/**
- * @brief Enable DCache
- *
- * @param data_autoload_en DCache auto preload enabled
- */
-__attribute__((always_inline)) static inline void cache_ll_l1_enable_dcache(bool data_autoload_en)
-{
-    Cache_Enable_DCache(data_autoload_en ? CACHE_LL_L1_DCACHE_AUTOLOAD : 0);
-}
-
-/**
- * @brief Disable DCache
- */
-__attribute__((always_inline)) static inline void cache_ll_l1_disable_dcache(void)
-{
-    Cache_Disable_DCache();
-}
-
-/**
- * @brief Disable Cache
- *
- * @param cache_level  level of the cache
- * @param type         see `cache_type_t`
- * @param cache_id     id of the cache in this type and level
- */
-__attribute__((always_inline)) static inline void cache_ll_disable_cache(uint32_t cache_level, cache_type_t type, uint32_t cache_id)
-{
-    switch (type)
-    {
-    case CACHE_TYPE_INSTRUCTION:
-        cache_ll_l1_disable_icache();
-        break;
-    case CACHE_TYPE_DATA:
-        cache_ll_l1_disable_dcache();
-        break;
-    default: // CACHE_TYPE_ALL
-        cache_ll_l1_disable_icache();
-        cache_ll_l1_disable_dcache();
-        break;
-    }
-}
-
-/**
- * @brief Enable Cache
- *
- * @param cache_level       level of the cache
- * @param type              see `cache_type_t`
- * @param cache_id          id of the cache in this type and level
- * @param data_autoload_en  data autoload enabled or not
- * @param inst_autoload_en  inst autoload enabled or not
- */
-__attribute__((always_inline)) static inline void cache_ll_enable_cache(uint32_t cache_level, cache_type_t type, uint32_t cache_id, bool inst_autoload_en, bool data_autoload_en)
-{
-    switch (type)
-    {
-    case CACHE_TYPE_INSTRUCTION:
-        cache_ll_l1_enable_icache(inst_autoload_en);
-        break;
-    case CACHE_TYPE_DATA:
-        cache_ll_l1_enable_dcache(data_autoload_en);
-        break;
-    default: // CACHE_TYPE_ALL
-        cache_ll_l1_enable_icache(inst_autoload_en);
-        cache_ll_l1_enable_dcache(data_autoload_en);
-        break;
-    }
-}
-
-void cache_hal_disable(uint32_t cache_level, cache_type_t type)
-{
-    cache_ll_disable_cache(cache_level, type, CACHE_LL_ID_ALL);
-}
-
-void cache_hal_enable(uint32_t cache_level, cache_type_t type)
-{
-    if (cache_level == 1)
-    {
-        cache_ll_enable_cache(1, type, CACHE_LL_ID_ALL, ctx.l1.i_autoload_en, ctx.l1.d_autoload_en);
-    }
-    else if (cache_level == 2)
-    {
-        cache_ll_enable_cache(2, type, CACHE_LL_ID_ALL, ctx.l2.i_autoload_en, ctx.l2.d_autoload_en);
-    }
 }
 
 void bootloader_enable_wp(void)

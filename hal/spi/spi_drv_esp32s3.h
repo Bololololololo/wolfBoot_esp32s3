@@ -1094,10 +1094,6 @@ extern esp_rom_spiflash_result_t esp_rom_spiflash_config_readmode(esp_rom_spifla
 extern esp_rom_spiflash_result_t esp_rom_spiflash_config_param(uint32_t deviceId, uint32_t chip_size, uint32_t block_size,
                                                                uint32_t sector_size, uint32_t page_size, uint32_t status_mask);
 extern void esp_rom_spiflash_select_qio_pins(uint8_t wp_gpio_num, uint32_t spiconfig);
-extern void Cache_Enable_ICache(uint32_t autoload);
-extern uint32_t Cache_Disable_ICache(void);
-extern void Cache_Enable_DCache(uint32_t autoload);
-extern uint32_t Cache_Disable_DCache(void);
 
 // Functions
 // set bit or set bits to register
@@ -1431,41 +1427,6 @@ typedef enum
     FLASH_WRAP_SIZE_32B = 32,
     FLASH_WRAP_SIZE_64B = 64,
 } spi_flash_wrap_size_t;
-
-typedef enum
-{
-    CACHE_TYPE_DATA,
-    CACHE_TYPE_INSTRUCTION,
-    CACHE_TYPE_ALL // This means both ICache and DCache will be used. On some chips, I/D are controlled by a shared Cache. Also use this enum under this condition. See `SOC_SHARED_IDCACHE_SUPPORTED`.
-} cache_type_t;
-
-/**
- * Necessary hal contexts, could be maintained by upper layer in the future
- */
-typedef struct
-{
-    bool i_autoload_en;
-    bool d_autoload_en;
-#if CACHE_LL_ENABLE_DISABLE_STATE_SW
-    // There's no register indicating if cache is enabled on these chips, use sw flag to save this state.
-    bool i_cache_enabled;
-    bool d_cache_enabled;
-#endif
-} cache_hal_state_t;
-
-typedef struct
-{
-    cache_hal_state_t l1;
-    cache_hal_state_t l2;
-} cache_hal_context_t;
-
-#define CACHE_LL_L1_ICACHE_AUTOLOAD (1 << 2)
-#define CACHE_LL_L1_DCACHE_AUTOLOAD (1 << 2)
-#define CACHE_LL_ID_ALL 2        // All of the caches in a type and level, make this value greater than any id
-#define CACHE_LL_LEVEL_INT_MEM 0 // Cache level for accessing internal mem
-#define CACHE_LL_LEVEL_EXT_MEM 1 // Cache level for accessing external mem
-#define CACHE_LL_LEVEL_ALL 2     // All of the cache levels, make this value greater than any level
-#define CACHE_LL_LEVEL_NUMS 1    // Number of cache levels
 
 /**
  * @brief Probe flash wrap method
