@@ -77,36 +77,36 @@ uint32_t IRAM_ATTR bootloader_flash_execute_command_common(
     uint32_t old_user_reg = 0;
     uint32_t old_user1_reg = 0;
     uint32_t old_user2_reg = 0;
-    spi_flash_ll_get_common_command_register_info(&SPIMEM_LL_APB, &old_ctrl_reg, &old_user_reg, &old_user1_reg, &old_user2_reg);
+    spimem_flash_ll_get_common_command_register_info(&SPIMEM_LL_APB, &old_ctrl_reg, &old_user_reg, &old_user1_reg, &old_user2_reg);
     SPIMEM_LL_APB.ctrl.val = 0;
     spimem_flash_ll_set_wp_level(&SPIMEM_LL_APB, true);
     // command phase
-    spi_flash_ll_set_command(&SPIMEM_LL_APB, command, 8);
+    spimem_flash_ll_set_command(&SPIMEM_LL_APB, command, 8);
     // addr phase
-    spi_flash_ll_set_addr_bitlen(&SPIMEM_LL_APB, addr_len);
-    spi_flash_ll_set_usr_address(&SPIMEM_LL_APB, address, addr_len);
+    spimem_flash_ll_set_addr_bitlen(&SPIMEM_LL_APB, addr_len);
+    spimem_flash_ll_set_usr_address(&SPIMEM_LL_APB, address, addr_len);
     // dummy phase
     uint32_t total_dummy = dummy_len;
     if (miso_len > 0)
     {
         total_dummy += g_rom_spiflash_dummy_len_plus[1];
     }
-    spi_flash_ll_set_dummy(&SPIMEM_LL_APB, total_dummy);
+    spimem_flash_ll_set_dummy(&SPIMEM_LL_APB, total_dummy);
     // output data
 
-    spi_flash_ll_set_mosi_bitlen((spi_dev_t *)&SPIMEM_LL_APB, mosi_len);
-    spi_flash_ll_set_buffer_data(&SPIMEM_LL_APB, &mosi_data, mosi_len / 8);
+    spimem_flash_ll_set_mosi_bitlen(&SPIMEM_LL_APB, mosi_len);
+    spimem_flash_ll_set_buffer_data(&SPIMEM_LL_APB, &mosi_data, mosi_len / 8);
     // input data
-    spi_flash_ll_set_miso_bitlen((spi_dev_t *)&SPIMEM_LL_APB, miso_len);
+    spimem_flash_ll_set_miso_bitlen(&SPIMEM_LL_APB, miso_len);
 
-    spi_flash_ll_user_start((spi_dev_t *)&SPIMEM_LL_APB, false);
-    while (!spi_flash_ll_cmd_is_done(&SPIMEM_LL_APB))
+    spimem_flash_ll_user_start(&SPIMEM_LL_APB, false);
+    while (!spimem_flash_ll_cmd_is_done(&SPIMEM_LL_APB))
     {
     }
-    spi_flash_ll_set_common_command_register_info(&SPIMEM_LL_APB, old_ctrl_reg, old_user_reg, old_user1_reg, old_user2_reg);
+    spimem_flash_ll_set_common_command_register_info(&SPIMEM_LL_APB, old_ctrl_reg, old_user_reg, old_user1_reg, old_user2_reg);
 
     uint32_t output_data = 0;
-    spi_flash_ll_get_buffer_data(&SPIMEM_LL_APB, &output_data, miso_len / 8);
+    spimem_flash_ll_get_buffer_data(&SPIMEM_LL_APB, &output_data, miso_len / 8);
     uint32_t ret = output_data;
     if (miso_len < 32)
     {
