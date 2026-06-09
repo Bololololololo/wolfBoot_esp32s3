@@ -22,35 +22,26 @@
 #ifdef TARGET_esp32s3
 
 #include <stdint.h>
+#include "xtensa/xt_instr_macros.h"
 
 /* Hardware initialization */
 void hal_init(void)
 {
-    //     esp_err_t ret = ESP_OK;
+    uint32_t memctl = XCHAL_CACHE_MEMCTL_DEFAULT;
+    WSR(MEMCTL, memctl);
 
-    // #if XCHAL_ERRATUM_572
-    //     uint32_t memctl = XCHAL_CACHE_MEMCTL_DEFAULT;
-    //     WSR(MEMCTL, memctl);
-    // #endif // XCHAL_ERRATUM_572
+    // bootloader_ana_reset_config();
+    // bootloader_super_wdt_auto_feed();
 
-    //     bootloader_ana_reset_config();
-    //     bootloader_super_wdt_auto_feed();
+    // protect memory region
+    // bootloader_init_mem();
+    /* check that static RAM is after the stack */
 
-    // // In RAM_APP, memory will be initialized in `call_start_cpu0`
-    // #if !CONFIG_APP_BUILD_TYPE_RAM
-    //     // protect memory region
-    //     bootloader_init_mem();
-    //     /* check that static RAM is after the stack */
-    // #ifndef NDEBUG
-    //     {
-    //         assert(&_bss_start <= &_bss_end);
-    //         assert(&_data_start <= &_data_end);
-    //     }
-    // #endif
+    // assert(&_bss_start <= &_bss_end);
+    // assert(&_data_start <= &_data_end);
+
     //     // clear bss section
-    //     bootloader_clear_bss_section();
-    // #endif // !CONFIG_APP_BUILD_TYPE_RAM
-
+    // bootloader_clear_bss_section();
     //     // init eFuse virtual mode (read eFuses to RAM)
     // #ifdef CONFIG_EFUSE_VIRTUAL
     //     ESP_EARLY_LOGW(TAG, "eFuse virtual mode is enabled. If Secure boot or Flash encryption is enabled then it does not provide any security. FOR TESTING ONLY!");

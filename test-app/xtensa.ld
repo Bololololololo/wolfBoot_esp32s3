@@ -11,8 +11,8 @@ iram_dram_offset = 0x6f0000;
 /* Partition layout for test app */
 test_app_dram_end = 0x3fcd0000;
 test_app_stack_overhead = 0x1000;
-test_app_dram_len = 0x4000; /* 16 KB for test app data */
-test_app_iram_len = 0x4000; /* 16 KB for test app code */
+test_app_dram_len = 0x8000; /* 32 KB for data */
+test_app_iram_len = 0x8000; /* 32 KB for code */
 
 test_app_dram_end_adjusted = test_app_dram_end - test_app_stack_overhead;
 test_app_dram_start = test_app_dram_end_adjusted - test_app_dram_len;
@@ -29,49 +29,44 @@ MEMORY
 
 SECTIONS
 {
+    /* Code and read-only data */
     .text :
     {
         _start_text = .;
         KEEP(*(.isr_vector))
+        KEEP(*(.cpu_exception_handlers))
         *(.text*)
-        *(.init)
-        *(.fini)
-        . = ALIGN(16);
-        KEEP(*(.rodata*))
+        *(.rodata*)
+        *(.init*)
+        *(.fini*)
+        *(.iram1 .iram1.*) /* catch stray IRAM_ATTR */
         . = ALIGN(16);
         _end_text = .;
-    } > IRAM
-
-    /* ARM unwind sections (Xtensa may use these) */
-    .exidx :
-    {
-        . = ALIGN(16);
-        *(.ARM.exidx*)
-        . = ALIGN(16);
     } > IRAM
 
     /* Store location for initialized data */
     _stored_data = .;
 
-    /* Initialized data section */
+    /* Initialized data section loaded from flash into RAM */
     .data : AT (_stored_data)
     {
+        _start_data = .;
+        KEEP(*(.data*))
         . = ALIGN(4);
-        _data_start = .;
-        *(.data*)
-        . = ALIGN(4);
-        _data_end = .;
+        _end_data = .;
     } > DRAM
 
     /* Uninitialized data section */
-    .bss :
+    .bss (NOLOAD) :
     {
-        . = ALIGN(4);
-        _bss_start = .;
+        _start_bss = .;
+        __bss_start__ = .;
         *(.bss*)
         *(COMMON)
         . = ALIGN(4);
-        _bss_end = .;
+        _end_bss = .;
+        __bss_end__ = .;
+        _end = .;
     } > DRAM
 
     /* Heap space */
@@ -81,6 +76,9 @@ SECTIONS
         _heap_start = .;
         . += 0x1000; /* 4 KB heap */
         _heap_end = .;
+        end = .;
+        _end = .;
+        __end__ = .;
     } > DRAM
 
     /* Stack space */

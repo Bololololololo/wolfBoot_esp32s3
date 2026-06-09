@@ -12,12 +12,19 @@ iram_dram_offset = 0x6f0000;
 bootloader_usable_dram_end = 0x3fce9700;
 bootloader_stack_overhead = 0x2000; /* For safety margin between bootloader data section and startup stacks */
 bootloader_dram_seg_len = 0x5000;
+bootloader_heap_seg_len = 0x8000;    /* 32KB Heap space inserted here */
 bootloader_iram_loader_seg_len = 0x10000;
 
 /* Start of the lower region is determined by region size and the end of the higher region */
 bootloader_dram_seg_end = bootloader_usable_dram_end - bootloader_stack_overhead;
 bootloader_dram_seg_start = bootloader_dram_seg_end - bootloader_dram_seg_len; /* 0x3FCE4700 start */
-bootloader_iram_loader_seg_start = bootloader_dram_seg_start - bootloader_iram_loader_seg_len + iram_dram_offset;
+
+/* Heap boundaries calculated relative to the DRAM segment start */
+bootloader_heap_start = bootloader_dram_seg_start - bootloader_heap_seg_len; 
+bootloader_heap_end = bootloader_dram_seg_start;
+
+/* Adjust the IRAM loader segment to start right below the new heap region */
+bootloader_iram_loader_seg_start = bootloader_heap_start - bootloader_iram_loader_seg_len + iram_dram_offset;
 
 /*
  * Summary Table
@@ -36,9 +43,6 @@ PROVIDE ( esp_rom_spiflash_read_status = 0x40000ab0 );
 PROVIDE ( esp_rom_spiflash_config_readmode = 0x40000aa4 );
 PROVIDE ( esp_rom_spiflash_select_qio_pins = 0x40000a68 );
 PROVIDE ( esp_rom_spiflash_config_param = 0x40000a50 );
-PROVIDE ( rom_spiflash_legacy_data = 0x3fceffe4 );
-PROVIDE ( SPIMEM1 = 0x60002000 );
-PROVIDE ( SPIMEM0 = 0x60003000 );
 PROVIDE ( Cache_Disable_ICache = 0x4000186c );
 PROVIDE ( Cache_Enable_ICache = 0x40001878 );
 PROVIDE ( Cache_Disable_DCache = 0x40001884 );
@@ -55,6 +59,8 @@ MEMORY
 
     /* DRAM: Data RAM */
     DRAM (rwx)       : ORIGIN = bootloader_dram_seg_start, LENGTH = bootloader_dram_seg_len
+
+    RAM_HEAP (rwx)       : ORIGIN = bootloader_heap_start, LENGTH = bootloader_heap_seg_len
 }
 
 SECTIONS
@@ -72,13 +78,6 @@ SECTIONS
         *(.iram1 .iram1.*) /* catch stray IRAM_ATTR */
         . = ALIGN(16);
         _end_text = .;
-    } > IRAM
-
-    /* ARM unwind info (if using Xtensa GCC, this may differ) */
-    .exidx :
-    {
-        . = ALIGN(16);
-        *(.ARM.exidx*)
     } > IRAM
 
     /* Store location for initialized data */
@@ -105,6 +104,6 @@ SECTIONS
         __bss_end__ = .;
         _end = .;
     } > DRAM
-
     . = ALIGN(4);
 }
+

@@ -38,7 +38,7 @@ extern int vsnprintf(char *str, size_t size, const char *fmt, va_list ap);
 #define ENOMEM 12
 #endif
 #ifndef EBADF
-#define EBADF  9
+#define EBADF 9
 #endif
 #ifndef EINVAL
 #define EINVAL 22
@@ -46,10 +46,10 @@ extern int vsnprintf(char *str, size_t size, const char *fmt, va_list ap);
 int errno;
 
 /* Heap management */
-extern char _end; /* Defined by linker */
+extern char _end;           /* Defined by linker */
 extern char _Min_Heap_Size; /* Linker symbol: address is the value */
 
-char *__env[1] = { 0 };
+char *__env[1] = {0};
 char **environ = __env;
 
 int _close(int file)
@@ -84,7 +84,8 @@ void *_sbrk(int incr)
     char *prev_heap_end;
     char *heap_limit;
 
-    if (heap_end == 0) {
+    if (heap_end == 0)
+    {
         heap_end = &_end;
     }
     prev_heap_end = heap_end;
@@ -93,7 +94,8 @@ void *_sbrk(int incr)
      * address represents the size value */
     heap_limit = &_end + (uintptr_t)&_Min_Heap_Size;
 
-    if (heap_end + incr > heap_limit) {
+    if (heap_end + incr > heap_limit)
+    {
         errno = ENOMEM;
         return (void *)-1;
     }
@@ -104,12 +106,13 @@ void *_sbrk(int incr)
 
 /* Forward declarations of UART functions from wolfBoot string.c */
 extern void uart_write(const char *buf, unsigned int sz);
-extern void uart_vprintf(const char* fmt, va_list argp);
+extern void uart_vprintf(const char *fmt, va_list argp);
 
 int _write(int file, char *ptr, int len)
 {
     /* Write to UART for stdout/stderr */
-    if (file == 1 || file == 2) {
+    if (file == 1 || file == 2)
+    {
         uart_write(ptr, len);
         return len;
     }
@@ -120,7 +123,8 @@ int _write(int file, char *ptr, int len)
 
 void _exit(int status)
 {
-    while (1) {
+    while (1)
+    {
         /* Intentional infinite loop - bare-metal has nowhere to exit to */
     }
 }
@@ -193,24 +197,29 @@ static int buf_num(char *buf, int pos, int size, unsigned int num,
     char tmp[12];
     int i = 0, neg = 0, total;
 
-    if (is_signed && (int)num < 0) {
+    if (is_signed && (int)num < 0)
+    {
         neg = 1;
         num = (unsigned int)(-(int)num);
     }
 
-    if (num == 0) {
+    if (num == 0)
+    {
         tmp[i++] = '0';
-    } else {
-        while (num > 0 && i < (int)sizeof(tmp)) {
+    }
+    else
+    {
+        while (num > 0 && i < (int)sizeof(tmp))
+        {
             int d = num % base;
-            tmp[i++] = (d < 10) ? ('0' + d) :
-                       ((is_upper ? 'A' : 'a') + d - 10);
+            tmp[i++] = (d < 10) ? ('0' + d) : ((is_upper ? 'A' : 'a') + d - 10);
             num /= base;
         }
     }
 
     total = i + neg;
-    while (total < width && pos < size - 1) {
+    while (total < width && pos < size - 1)
+    {
         buf[pos++] = zeropad ? '0' : ' ';
         total++;
     }
@@ -228,10 +237,13 @@ static int ___vsnprintf(char *buf, unsigned int size, const char *fmt, va_list a
     const char *fmtp = fmt;
     int zeropad, maxdigits, precision, leftjust;
 
-    if (size == 0) return 0;
+    if (size == 0)
+        return 0;
 
-    while (fmtp && *fmtp != '\0' && pos < (int)size - 1) {
-        if (*fmtp != '%') {
+    while (fmtp && *fmtp != '\0' && pos < (int)size - 1)
+    {
+        if (*fmtp != '%')
+        {
             buf[pos++] = *fmtp++;
             continue;
         }
@@ -239,129 +251,167 @@ static int ___vsnprintf(char *buf, unsigned int size, const char *fmt, va_list a
 
         zeropad = maxdigits = leftjust = 0;
         precision = -1;
-        if (*fmtp == '-') { leftjust = 1; fmtp++; }
-        while (*fmtp != '\0') {
-            if (*fmtp == '*') {
+        if (*fmtp == '-')
+        {
+            leftjust = 1;
+            fmtp++;
+        }
+        while (*fmtp != '\0')
+        {
+            if (*fmtp == '*')
+            {
                 maxdigits = va_arg(argp, int);
                 fmtp++;
-            } else if (*fmtp >= '0' && *fmtp <= '9') {
+            }
+            else if (*fmtp >= '0' && *fmtp <= '9')
+            {
                 if (*fmtp == '0' && maxdigits == 0)
                     zeropad = 1;
                 maxdigits = maxdigits * 10 + (*fmtp - '0');
                 fmtp++;
-            } else if (*fmtp == '.') {
+            }
+            else if (*fmtp == '.')
+            {
                 fmtp++;
-                if (*fmtp == '*') {
+                if (*fmtp == '*')
+                {
                     precision = va_arg(argp, int);
                     fmtp++;
-                } else {
+                }
+                else
+                {
                     precision = 0;
-                    while (*fmtp >= '0' && *fmtp <= '9') {
+                    while (*fmtp >= '0' && *fmtp <= '9')
+                    {
                         precision = precision * 10 + (*fmtp - '0');
                         fmtp++;
                     }
                 }
-            } else if (*fmtp == 'l' || *fmtp == 'z') {
+            }
+            else if (*fmtp == 'l' || *fmtp == 'z')
+            {
                 fmtp++;
-            } else {
+            }
+            else
+            {
                 break;
             }
         }
 
-        switch (*fmtp) {
-            case '%':
-                if (pos < (int)size - 1) buf[pos++] = '%';
-                break;
-            case 'd': case 'i':
-                pos = buf_num(buf, pos, size,
-                    (unsigned int)va_arg(argp, int), 10, 1,
-                    zeropad, maxdigits, 0);
-                break;
-            case 'u':
-                pos = buf_num(buf, pos, size,
-                    va_arg(argp, unsigned int), 10, 0,
-                    zeropad, maxdigits, 0);
-                break;
-            case 'x':
-                pos = buf_num(buf, pos, size,
-                    va_arg(argp, unsigned int), 16, 0,
-                    zeropad, maxdigits, 0);
-                break;
-            case 'X':
-                pos = buf_num(buf, pos, size,
-                    va_arg(argp, unsigned int), 16, 0,
-                    zeropad, maxdigits, 1);
-                break;
-            case 'p':
-                if (pos < (int)size - 1) buf[pos++] = '0';
-                if (pos < (int)size - 1) buf[pos++] = 'x';
-                pos = buf_num(buf, pos, size,
-                    (unsigned int)(uintptr_t)va_arg(argp, void*), 16, 0,
-                    1, 8, 0);
-                break;
-            case 's':
+        switch (*fmtp)
+        {
+        case '%':
+            if (pos < (int)size - 1)
+                buf[pos++] = '%';
+            break;
+        case 'd':
+        case 'i':
+            pos = buf_num(buf, pos, size,
+                          (unsigned int)va_arg(argp, int), 10, 1,
+                          zeropad, maxdigits, 0);
+            break;
+        case 'u':
+            pos = buf_num(buf, pos, size,
+                          va_arg(argp, unsigned int), 10, 0,
+                          zeropad, maxdigits, 0);
+            break;
+        case 'x':
+            pos = buf_num(buf, pos, size,
+                          va_arg(argp, unsigned int), 16, 0,
+                          zeropad, maxdigits, 0);
+            break;
+        case 'X':
+            pos = buf_num(buf, pos, size,
+                          va_arg(argp, unsigned int), 16, 0,
+                          zeropad, maxdigits, 1);
+            break;
+        case 'p':
+            if (pos < (int)size - 1)
+                buf[pos++] = '0';
+            if (pos < (int)size - 1)
+                buf[pos++] = 'x';
+            pos = buf_num(buf, pos, size,
+                          (unsigned int)(uintptr_t)va_arg(argp, void *), 16, 0,
+                          1, 8, 0);
+            break;
+        case 's':
+        {
+            const char *str = va_arg(argp, const char *);
+            int slen;
+            const char *sp;
+            if (!str)
+                str = "(null)";
+            sp = str;
+            slen = 0;
+            while (*sp++)
+                slen++;
+            if (leftjust)
             {
-                const char *str = va_arg(argp, const char*);
-                int slen;
-                const char *sp;
-                if (!str) str = "(null)";
                 sp = str;
-                slen = 0;
-                while (*sp++) slen++;
-                if (leftjust) {
-                    sp = str;
-                    while (*sp && pos < (int)size - 1)
-                        buf[pos++] = *sp++;
-                    while (slen < maxdigits && pos < (int)size - 1) {
-                        buf[pos++] = ' ';
-                        slen++;
-                    }
-                } else {
-                    while (slen < maxdigits && pos < (int)size - 1) {
-                        buf[pos++] = ' ';
-                        slen++;
-                    }
-                    sp = str;
-                    while (*sp && pos < (int)size - 1)
-                        buf[pos++] = *sp++;
+                while (*sp && pos < (int)size - 1)
+                    buf[pos++] = *sp++;
+                while (slen < maxdigits && pos < (int)size - 1)
+                {
+                    buf[pos++] = ' ';
+                    slen++;
                 }
-                break;
             }
-            case 'c':
-                if (pos < (int)size - 1)
-                    buf[pos++] = (char)va_arg(argp, int);
-                break;
-#ifdef UART_PRINTF_FLOAT
-            case 'f': case 'e': case 'g':
+            else
             {
-                double val = va_arg(argp, double);
-                int prec = (precision >= 0) ? precision : 3;
-                unsigned int ipart;
-                double frac;
-                int digit, k;
-
-                if (val < 0.0) {
-                    if (pos < (int)size - 1) buf[pos++] = '-';
-                    val = -val;
+                while (slen < maxdigits && pos < (int)size - 1)
+                {
+                    buf[pos++] = ' ';
+                    slen++;
                 }
-                ipart = (unsigned int)val;
-                pos = buf_num(buf, pos, size, ipart, 10, 0, 0, 0, 0);
-                if (prec > 0) {
-                    frac = val - (double)ipart;
-                    if (pos < (int)size - 1) buf[pos++] = '.';
-                    for (k = 0; k < prec && pos < (int)size - 1; k++) {
-                        frac *= 10.0;
-                        digit = (int)frac;
-                        if (digit > 9) digit = 9;
-                        buf[pos++] = '0' + digit;
-                        frac -= (double)digit;
-                    }
-                }
-                break;
+                sp = str;
+                while (*sp && pos < (int)size - 1)
+                    buf[pos++] = *sp++;
             }
+            break;
+        }
+        case 'c':
+            if (pos < (int)size - 1)
+                buf[pos++] = (char)va_arg(argp, int);
+            break;
+#ifdef UART_PRINTF_FLOAT
+        case 'f':
+        case 'e':
+        case 'g':
+        {
+            double val = va_arg(argp, double);
+            int prec = (precision >= 0) ? precision : 3;
+            unsigned int ipart;
+            double frac;
+            int digit, k;
+
+            if (val < 0.0)
+            {
+                if (pos < (int)size - 1)
+                    buf[pos++] = '-';
+                val = -val;
+            }
+            ipart = (unsigned int)val;
+            pos = buf_num(buf, pos, size, ipart, 10, 0, 0, 0, 0);
+            if (prec > 0)
+            {
+                frac = val - (double)ipart;
+                if (pos < (int)size - 1)
+                    buf[pos++] = '.';
+                for (k = 0; k < prec && pos < (int)size - 1; k++)
+                {
+                    frac *= 10.0;
+                    digit = (int)frac;
+                    if (digit > 9)
+                        digit = 9;
+                    buf[pos++] = '0' + digit;
+                    frac -= (double)digit;
+                }
+            }
+            break;
+        }
 #endif /* UART_PRINTF_FLOAT */
-            default:
-                break;
+        default:
+            break;
         }
         fmtp++;
     }
@@ -384,7 +434,8 @@ int puts(const char *s)
 {
     const char *p = s;
     unsigned int len = 0;
-    while (*p++) len++;
+    while (*p++)
+        len++;
     uart_write(s, len);
     uart_write("\n", 1);
     return 0;
@@ -410,7 +461,8 @@ int fputs(const char *s, void *stream)
     const char *p = s;
     unsigned int len = 0;
     (void)stream;
-    while (*p++) len++;
+    while (*p++)
+        len++;
     uart_write(s, len);
     return 0;
 }

@@ -185,7 +185,8 @@ CFLAGS+= \
   -I"." -I"include/" -I"$(WOLFBOOT_LIB_WOLFSSL)" \
   -Wno-array-bounds \
   -D"WOLFSSL_USER_SETTINGS" \
-  -D"WOLFTPM_USER_SETTINGS"
+  -D"WOLFTPM_USER_SETTINGS" \
+  -Wno-error=cpp
 CFLAGS+=$(WOLFPSA_CFLAGS)
 
 # Setup default optimizations (for GCC)

@@ -1081,7 +1081,7 @@ typedef struct __attribute__((packed))
     uint8_t status_qio_bit;
 } bootloader_qio_info_t;
 
-extern esp_rom_spiflash_legacy_data_t *rom_spiflash_legacy_data;
+#define rom_spiflash_legacy_data ((esp_rom_spiflash_legacy_data_t *)0x3fceffe4)
 #define g_rom_flashchip (rom_spiflash_legacy_data->chip)
 #define g_rom_spiflash_dummy_len_plus (rom_spiflash_legacy_data->dummy_len_plus)
 
@@ -1152,8 +1152,8 @@ extern void esp_rom_spiflash_select_qio_pins(uint8_t wp_gpio_num, uint32_t spico
         (base_reg).val = temp_reg.val;                                 \
     }
 
-extern spi_mem_dev_t SPIMEM1;
-#define SPIMEM_LL_APB SPIMEM1
+#define SPIMEM1 (0x60002000U)
+#define SPIMEM_LL_APB (*(volatile spi_mem_dev_t *)SPIMEM1)
 
 /**
 * @brief Write protect signal output when SPI is idle
